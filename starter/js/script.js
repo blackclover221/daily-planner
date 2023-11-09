@@ -1,13 +1,12 @@
 $(document).ready(function () {
 
+    // Display current day at the top of the calendar
+    $("#currentDay").text(dayjs().format("dddd, MMMM Do"));
+
     $(".saveBtn").on("click", function () {
-        console.log(`It saved`);
-
-        let timeID = $(this).parent().attr("id")
+        // Save button click event
+        let timeID = $(this).parent().attr("id");
         let value = $(this).siblings(".description").val();
-
-        console.log(timeID);
-        console.log(value);
 
         localStorage.setItem(timeID, value);
 
@@ -16,18 +15,46 @@ $(document).ready(function () {
         setTimeout(function () {
             $(".notification").removeClass("show");
 
-        }, 5000)
+        }, 5000);
+    });
 
-    })
+    // Color-code timeblocks based on past, present, and future
+    function updateTimeblocks() {
+        let currentHour = dayjs().hour();
 
-    function hourUpdate() {
-        let currentHour = moment().hours();
-        console.log(currentHour);
+        $(".time-block").each(function () {
+            let blockHour = parseInt($(this).attr("id").split("-")[1]);
 
-
-
-
+            if (blockHour < currentHour) {
+                $(this).addClass("past");
+            } else if (blockHour === currentHour) {
+                $(this).removeClass("past");
+                $(this).addClass("present");
+            } else {
+                $(this).removeClass("past");
+                $(this).removeClass("present");
+                $(this).addClass("future");
+            }
+        });
     }
-    hourUpdate;
 
-})
+
+    // Call the updateTimeblocks function
+    updateTimeblocks();
+
+    setInterval(updateTimeblocks, 60000);
+
+    // Retrieve and display events from local storage
+    function displayEvents() {
+        $(".time-block").each(function () {
+            let timeID = $(this).attr("id");
+            let event = localStorage.getItem(timeID);
+
+            if (event) {
+                $(this).children(".description").val(event);
+            }
+        });
+    }
+
+    displayEvents();
+});
